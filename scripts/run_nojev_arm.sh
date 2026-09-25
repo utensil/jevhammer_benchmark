@@ -28,7 +28,7 @@ fi
 
 memory_max="$(cat /sys/fs/cgroup/memory.max)"
 swap_max="$(cat /sys/fs/cgroup/memory.swap.max)"
-test "$memory_max" = "17179869184" || { echo "expected 16 GiB cgroup cap, observed $memory_max" >&2; exit 1; }
+test "$memory_max" = "16000000000" || { echo "expected 16,000,000,000-byte cgroup cap, observed $memory_max" >&2; exit 1; }
 test "$swap_max" = "0" || { echo "expected zero-swap cgroup, observed $swap_max" >&2; exit 1; }
 
 test ! -e "$OUTPUT_DIR" || { echo "refusing to overwrite $OUTPUT_DIR" >&2; exit 1; }

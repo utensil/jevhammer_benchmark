@@ -24,10 +24,15 @@ service is used.
 
 ## Resource boundary and concurrency
 
-Use Linux cgroup v2 with a hard 16 GiB memory maximum and zero swap. The arm
-runner verifies `memory.max=17179869184` and `memory.swap.max=0` before starting
+Use Linux cgroup v2 with a hard 16,000,000,000-byte memory maximum and zero
+swap, matching the scorer's resource gate and the recorded CPU arm. The arm
+runner verifies `memory.max=16000000000` and `memory.swap.max=0` before starting
 and omits `--external-memory-limit`; the CLI records the observed cgroup. A
 declaration that a process is externally managed is not a resource limit.
+
+Outcome-free selector preparation and cohort discovery may use a separate
+bounded 16 GiB zero-swap setup container. Their `--memory-limit` must match that
+container's observed `memory.max`; these setup records are not proof-arm results.
 
 The batches inside each arm run in order, one at a time. Given-order and the
 standalone random arm may run at the same time in separate capped processes;
@@ -42,7 +47,7 @@ shows that timeouts and errors remain stable.
 
 Follow the upstream [confirmation reproduction guide](reproducing-confirmation.md)
 for Linux prerequisites and native engines. Keep the pinned Lake manifest. Run
-setup inside the same 16 GiB zero-swap cgroup used for later work. Install
+setup inside a bounded zero-swap cgroup. Install
 `unzip` first: the pinned cvc5 and Lean-auto packages use it to unpack their
 platform release archives. On an Apple Silicon arm64 Linux guest, Lean-auto's
 pinned Zipperposition 2.1 bundle is x86-64; use a Rosetta-enabled VM and install
@@ -85,7 +90,7 @@ python3 -m jevselector prepare \
   --project integrations/leanhammer --modules Mathlib --scope Mathlib \
   --catalog public-constants \
   --exclude datasets/full-leanhammer-confirmation-v1/holdouts.json \
-  --threads 2 --memory-limit 16000000000 --output artifacts/confirmation
+  --threads 2 --memory-limit 17179869184 --output artifacts/confirmation
 ```
 
 The ranker patch changes project identity. Rediscover and re-admit the cohort
@@ -98,7 +103,7 @@ python3 -m jevhammer_benchmark discover \
   --modules-file datasets/full-leanhammer-confirmation-v1/modules.json \
   --exclude datasets/full-leanhammer-confirmation-v1/exclusions.json \
   --import LeanHammerComparison --count 1024 --max-per-declaration 1 \
-  --seed 20260921 --threads 8 --memory-limit 16000000000 \
+  --seed 20260921 --threads 8 --memory-limit 17179869184 \
   --output runs/confirmation-discovery
 python3 scripts/admit_complete_discovery.py \
   runs/confirmation-discovery \
@@ -123,7 +128,8 @@ running an arm.
 
 The upstream project guide shows eight-way batch fan-out for its larger study.
 This ablation keeps each arm sequential. In independent Linux checkouts, launch
-these two commands in separate 16 GiB zero-swap cgroups if whole-arm concurrency
+these two commands in separate zero-swap cgroups capped at exactly
+16,000,000,000 bytes if whole-arm concurrency
 is desired:
 
 ```sh

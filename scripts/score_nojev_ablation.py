@@ -54,7 +54,7 @@ def load_arm(pattern, stats_path=None):
         cap = manifest["resources"]["initial"]
         if (cap.get("mode") != "cgroup" or cap.get("memoryMax", LIMIT + 1) > LIMIT
                 or cap.get("swapMax") != "0"):
-            raise ValueError(f"trial was not inside a verified 16 GiB zero-swap cgroup: {run_dir.name}")
+            raise ValueError(f"trial was not inside a verified 16,000,000,000-byte zero-swap cgroup: {run_dir.name}")
         verification = read(run_dir / "verification.json")
         if verification.get("status") != "complete":
             raise ValueError(f"incomplete proof replay: {run_dir.name}")
