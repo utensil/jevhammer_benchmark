@@ -17,6 +17,8 @@ fixed order. See the [attribution audit](docs/guidance-attribution.md) and
 The repository includes Sine Qua Non baselines, a prepared
 [JevSelector](https://github.com/adamtopaz/jevselector) adapter, and an opt-in
 neural premise-service adapter, plus an optional full LeanHammer comparison.
+The [`ablation` branch](docs/nojev-ordering-ablation.md) adds a full-cohort
+no-Jev given-order, random-norepeat, and given-then-random hybrid reproduction.
 
 ## State-guidance ablation: 256 goals
 

@@ -1,0 +1,73 @@
+diff --git a/JevHammerBenchmark/Ranker.lean b/JevHammerBenchmark/Ranker.lean
+index 48b8415..15bdc8f 100644
+--- a/JevHammerBenchmark/Ranker.lean
++++ b/JevHammerBenchmark/Ranker.lean
+@@ -23,13 +23,66 @@ def appendJson (path : System.FilePath) (json : Json) : IO Unit := do
+   handle.putStrLn json.compress
+   handle.flush
+ 
++private def splitmix64 (x : UInt64) : UInt64 :=
++  let z := x + 0x9E3779B97F4A7C15
++  let z := (z ^^^ (z >>> 30)) * 0xBF58476D1CE4E5B9
++  let z := (z ^^^ (z >>> 27)) * 0x94D049BB133111EB
++  z ^^^ (z >>> 31)
++
++/-- Seeded permutation of continuation candidates. A candidate whose compressed
++`remaining` state was offered earlier in this goal is demoted behind fresh states. --/
++def noJevRandomNorepeat (site method : String) : IO Ranker := do
++  let seen ← IO.mkRef ({} : Std.HashSet String)
++  let rng ← IO.mkRef (0x20260921ACC0DE64 : UInt64)
++  let calls ← IO.mkRef (0 : Nat)
++  let dump ← IO.getEnv "NOJEV_DUMP"
++  let stats ← IO.getEnv "NOJEV_STATS"
++  return fun state choices => do
++    let n := choices.size
++    let identity := (List.range n).toArray
++    if state.getObjValD "task" != .str "continuations" then
++      return { order := identity, model := "random-norepeat" }
++    let mut r ← rng.get
++    let mut idx := identity
++    let mut i := n
++    while i > 1 do
++      i := i - 1
++      r := splitmix64 r
++      let j := (r % (i + 1).toUInt64).toNat
++      let a := idx[i]!; let b := idx[j]!
++      idx := (idx.set! i b).set! j a
++    rng.set r
++    let keys := choices.map fun c => (c.getObjValD "remaining").compress
++    let old ← seen.get
++    let mut fresh : Array Nat := #[]
++    let mut repeats : Array Nat := #[]
++    for k in idx do
++      if old.contains keys[k]! then repeats := repeats.push k else fresh := fresh.push k
++    seen.set (keys.foldl (fun s k => s.insert k) old)
++    let c ← calls.get
++    calls.set (c + 1)
++    if c < 3 then
++      if let some p := dump then
++        appendJson (System.FilePath.mk p) (Json.mkObj [
++          ("site", toJson site), ("method", toJson method), ("call", toJson c),
++          ("state", state), ("choices", .arr choices)])
++    if let some p := stats then
++      appendJson (System.FilePath.mk p) (Json.mkObj [
++        ("site", toJson site), ("call", toJson c), ("candidates", toJson n),
++        ("fresh", toJson fresh.size), ("excluded", toJson repeats.size),
++        ("order", toJson (fresh ++ repeats))])
++    return { order := fresh ++ repeats, model := "random-norepeat" }
++
+ /-- The driver serializes all processes in a run. Reserve requests on disk before
+ network IO so failed calls and interrupted runs retain their accounting. -/
+ private def jevRanker (directory : System.FilePath) (site method : String)
+     (config : JevHammer.Config) (maxRequests maxInputTokens : Nat)
+     (mock : Bool) (blocked : IO.Ref Bool) : IO Ranker := do
+-  if mock then return fun _ choices => pure {
+-    order := (List.range choices.size).toArray, model := "OFFLINE-MOCK" }
++  if mock then
++    if (← IO.getEnv "NOJEV_RANKER") == some "random-norepeat" then
++      return ← noJevRandomNorepeat site method
++    return fun _ choices => pure {
++      order := (List.range choices.size).toArray, model := "OFFLINE-MOCK" }
+   let client ← IO.mkRef (none : Option TypeSafe.Client)
+   return fun state choices => do
+     let path := directory / "usage.json"
