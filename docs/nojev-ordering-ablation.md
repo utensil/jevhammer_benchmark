@@ -42,8 +42,9 @@ shows that timeouts and errors remain stable.
 
 Follow the upstream [confirmation reproduction guide](reproducing-confirmation.md)
 for Linux prerequisites and native engines. Keep the pinned Lake manifest. Run
-setup inside the same 16 GiB zero-swap cgroup used for later work. Starting from
-the repository root:
+setup inside the same 16 GiB zero-swap cgroup used for later work. Install
+`unzip` first: the pinned cvc5 and Lean-auto packages use it to unpack their
+platform release archives. Starting from the repository root:
 
 ```sh
 cd integrations/leanhammer
