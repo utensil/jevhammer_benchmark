@@ -44,15 +44,32 @@ Follow the upstream [confirmation reproduction guide](reproducing-confirmation.m
 for Linux prerequisites and native engines. Keep the pinned Lake manifest. Run
 setup inside the same 16 GiB zero-swap cgroup used for later work. Install
 `unzip` first: the pinned cvc5 and Lean-auto packages use it to unpack their
-platform release archives. Starting from the repository root:
+platform release archives. On an Apple Silicon arm64 Linux guest, Lean-auto's
+pinned Zipperposition 2.1 bundle is x86-64; use a Rosetta-enabled VM and install
+its amd64 loader in the container, or supply a native arm64 build of the same
+pinned solver:
+
+```sh
+dpkg --add-architecture amd64
+apt-get update
+apt-get install -y libc6:amd64
+```
+
+Starting from the repository root:
 
 ```sh
 cd integrations/leanhammer
 lake exe cache get
+# If Lake restored the cvc5 target trace without its static bundle, rerun that target.
+CVC5_DIR=.lake/packages/cvc5
+if ! find "$CVC5_DIR" -path '*/lib/libcvc5.a' -print -quit | grep -q .; then
+  rm -f "$CVC5_DIR/.lake/build/cvc5Enums.trace"
+fi
 cd ../..
 bash scripts/apply_nojev_ranker_patch.sh
 cd integrations/leanhammer
 lake build LeanHammerComparison
+lake lean Smoke.lean
 cd ../..
 python3 -m pip install --no-deps ./integrations/leanhammer/.lake/packages/jevselector
 ```
