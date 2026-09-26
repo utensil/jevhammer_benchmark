@@ -1,0 +1,124 @@
+{
+  "arms": {
+    "given-order": {
+      "onTimeVerified": 407,
+      "rawSolved": 408,
+      "rawVerified": 408,
+      "sites": 1024
+    },
+    "hybrid": {
+      "onTimeVerified": 423,
+      "rawSolved": 424,
+      "rawVerified": 424,
+      "sites": 1024
+    },
+    "random": {
+      "onTimeVerified": 398,
+      "rawSolved": 398,
+      "rawVerified": 398,
+      "sites": 1024
+    }
+  },
+  "askedSubset652": {
+    "given-order": {
+      "onTimeVerified": 46,
+      "rawSolved": 47,
+      "rawVerified": 47,
+      "sites": 652
+    },
+    "hybrid": {
+      "onTimeVerified": 62,
+      "rawSolved": 63,
+      "rawVerified": 63,
+      "sites": 652
+    },
+    "random": {
+      "onTimeVerified": 37,
+      "rawSolved": 37,
+      "rawVerified": 37,
+      "sites": 652
+    }
+  },
+  "cohortSha256": "b1b505ae00d6fd1b46e2fd7f094692bfd6b6100f2764508a38ba19bab2e1e92c",
+  "hybrid": {
+    "definition": "given-order full cohort, then random-norepeat fallback on given-order misses",
+    "derivedGivenUnionStandaloneRandomRawSolved": 422,
+    "executedHybridVsFullArmUnionSolvedFlagFlips": 2,
+    "fallbackMarginalSolved": 16,
+    "fallbackRawSolved": 16,
+    "fallbackSites": 616,
+    "randomFullVsFallbackReplayFlagDifferencesOnMisses": 2,
+    "randomFullVsFallbackSolvedFlagFlipsOnMisses": 2
+  },
+  "kind": "full-no-jev-ordering-ablation",
+  "limitations": [
+    "The cohort is a stratified, size-filtered Mathlib sample, not uniform sampling of all Mathlib goals.",
+    "The five source-incompatible modules were excluded before sampling; no proof-trial failures were dropped.",
+    "The hybrid reuses the completed given-order pass and executes random fallback only on its misses.",
+    "The random arm and hybrid fallback are separate executions; report any per-site disagreement.",
+    "Jev ranking latency is charged to its original deadline, while local no-Jev ranking is near-zero cost."
+  ],
+  "method": "LeanHammerComparison.cpu",
+  "pairedAgainstJevRawSolved": {
+    "given-order": {
+      "all": {
+        "armOnly": 8,
+        "jevOnly": 50,
+        "twoSidedExactMcNemarP": 1.5702617754687065e-08
+      },
+      "asked": {
+        "armOnly": 8,
+        "jevOnly": 50,
+        "twoSidedExactMcNemarP": 1.5702617754687065e-08
+      }
+    },
+    "hybrid": {
+      "all": {
+        "armOnly": 15,
+        "jevOnly": 41,
+        "twoSidedExactMcNemarP": 0.0006855641563783821
+      },
+      "asked": {
+        "armOnly": 15,
+        "jevOnly": 41,
+        "twoSidedExactMcNemarP": 0.0006855641563783821
+      }
+    },
+    "random": {
+      "all": {
+        "armOnly": 10,
+        "jevOnly": 62,
+        "twoSidedExactMcNemarP": 2.6890686575861277e-10
+      },
+      "asked": {
+        "armOnly": 10,
+        "jevOnly": 62,
+        "twoSidedExactMcNemarP": 2.6890686575861277e-10
+      }
+    }
+  },
+  "protocol": {
+    "batchOrderWithinEachArm": "sequential 0 through 5",
+    "crossArmConcurrency": "given-order and standalone random may overlap; hybrid fallback starts after given-order completes",
+    "deviation": "separate bounded arms may overlap; the upstream guide requested no concurrent heavy job",
+    "perRunMemoryLimitBytes": 16000000000,
+    "perRunSwapLimitBytes": 0,
+    "timingClaims": "not made; elapsed times are retained in local raw outputs and omitted here"
+  },
+  "publicTrialsSha256": "2f8e17c01cdc1d1adb1356ab172665d8c7e7a81e6cbd06d1895e9d34f826214a",
+  "publishedJev": {
+    "all": {
+      "onTimeVerified": 450,
+      "rawSolved": 450,
+      "sites": 1024
+    },
+    "asked": {
+      "onTimeVerified": 89,
+      "rawSolved": 89,
+      "sites": 652
+    }
+  },
+  "schema": 1,
+  "sites": 1024,
+  "status": "complete"
+}

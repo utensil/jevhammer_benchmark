@@ -22,6 +22,30 @@ disables API ranking; the patched `NOJEV_RANKER=random-norepeat` mode still runs
 the real Lean tactic and independently replays every proof. No Jev key or Jev
 service is used.
 
+## Completed results (2026-09-26)
+
+All three outcomes cover the same 1,024-site cohort. Counts below distinguish
+any independently replayed proof from proofs that also met the six-second
+deadline. The 652-site subset contains goals where the published Jev CPU arm
+made at least one state-ranking call.
+
+| No-Jev arm | Full cohort: raw verified | Full cohort: on-time verified | Jev-asked subset: raw / on-time |
+|---|---:|---:|---:|
+| Given order | 408/1,024 | 407/1,024 | 47 / 46 of 652 |
+| Random-no-repeat | 398/1,024 | 398/1,024 | 37 / 37 of 652 |
+| Given then random fallback | 424/1,024 | 423/1,024 | 63 / 62 of 652 |
+
+The hybrid fallback ran on all 616 given-order misses and added 16 raw solved
+goals. The separately executed full-cohort random arm implies a 422-solve union
+with given order; the actual fallback hybrid differs from that union at two
+sites. Standalone random and fallback differed at two given-order misses, so
+the executed hybrid result is reported from its own sequential outcomes. The
+full random arm is reported independently. No elapsed-time comparison is made.
+
+The paired, per-site outcomes, exact cohort digest, scorer checks, and
+protocol/deviation metadata are in the [machine-readable results](nojev-ordering-ablation-results.json)
+and [sanitized 1,024-site records](nojev-ordering-ablation-trials.jsonl).
+
 ## Resource boundary and concurrency
 
 Use Linux cgroup v2 with a hard 16,000,000,000-byte memory maximum and zero
